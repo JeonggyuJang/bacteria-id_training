@@ -10,37 +10,29 @@ import torch
 from training import get_predictions
 from datasets import spectral_dataloader
 
-from util.data_preprocessing import raman_shift_matching
-
 def classify(config):
     result = []
     for i in range(len(config.spectra)):
         t00 = time()
 
-        #BUCKET_NAME = 'ramcell-test-spectra-source'
+        BUCKET_NAME = 'ramcell-test-spectra-source'
         #OBJECT_NAME = 'Glucose 500mW 10sec.txt'
         #OBJECT_NAME = 'Glucose 500mW 10sec.csv'
-        #OBJECT_NAME = config.spectra[i]
+        OBJECT_NAME = config.spectra[i]
 
-        #ext = OBJECT_NAME.split('.')[1]
-        #print("Object data type : {}".format(ext))
-        #s3 = boto3.client('s3')
-        #target_data_path = './download/inference_target_data.'+ext
-        #s3.download_file(BUCKET_NAME, OBJECT_NAME,target_data_path)
+        ext = OBJECT_NAME.split('.')[1]
+        print("Object data type : {}".format(ext))
+        s3 = boto3.client('s3')
+        target_data_path = './download/inference_target_data.'+ext
+        s3.download_file(BUCKET_NAME, OBJECT_NAME,target_data_path)
 
-        #if ext == 'txt' : data = pd.read_csv(target_data_path, sep="\t", header=None)
-        #else : data = pd.read_csv(target_data_path, header=None)
+        if ext == 'txt' : data = pd.read_csv(target_data_path, sep="\t", header=None)
+        else : data = pd.read_csv(target_data_path, header=None)
 
-
-        #X_axis = np.arange(0,1000)
-        #data_npy = data[1].to_numpy()
-        #input_data = np.interp(X_axis,np.linspace(0,1000,num=data_npy.shape[0]),data_npy)
-        #X = input_data.reshape(1,1000)
-
-        data = config.spectra[i]
-        X = raman_shift_matching(data)
-        X = np.array(X)
-        X = X.reshape(1,1000)
+        X_axis = np.arange(0,1000)
+        data_npy = data[1].to_numpy()
+        input_data = np.interp(X_axis,np.linspace(0,1000,num=data_npy.shape[0]),data_npy)
+        X = input_data.reshape(1,1000)
 
         # CNN parameters
         layers = 6

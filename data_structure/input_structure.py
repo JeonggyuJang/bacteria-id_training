@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from typing import Union
+from typing import Union, List
+
 
 class InputStructure(BaseModel):
-    id : int
-    experiment : int
-    spectra_path : str 
+    intensity : List[float]
+    raman_shift : List[float]
     pred : int
     acc : float
     probability : Union[float,None] = None
