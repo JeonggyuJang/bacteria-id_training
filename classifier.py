@@ -68,11 +68,10 @@ def classify(config):
         y = np.array([0])
 
         dl_test = spectral_dataloader(X, y,batch_size=config.batch_size,num_workers=1)
-        preds_test, corr_test = get_predictions(cnn,dl_test,cuda)
-        prob_test= get_predictions(cnn,dl_test,cuda,get_probs=True)
+        probs_list, preds, acc = get_predictions(cnn,dl_test,cuda)
+        # prob_test= get_predictions(cnn,dl_test,cuda,get_probs=True)
 
-        print(preds_test[0], corr_test)
-        print(prob_test)
-        print("train accuracy = {}%".format(corr_test/1*100))
-        result.append([preds_test[0], corr_test/1*100, prob_test])
+        print(preds, acc)
+        print(probs_list)
+        result.append([preds, acc, probs_list]) # [List[int], float, List[List[float]]]
     return result
