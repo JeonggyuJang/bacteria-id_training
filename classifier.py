@@ -12,9 +12,11 @@ from datasets import spectral_dataloader
 
 from util.data_preprocessing import raman_shift_matching
 
-def classify(config):
-    result = []
-    for i in range(len(config.spectra)):
+from data_structure.input_structure import BatchStructure
+
+def classify(batch_dic):
+    results = {}
+    for k, batch in batch_dic.items():
         t00 = time()
 
         #BUCKET_NAME = 'ramcell-test-spectra-source'
@@ -36,11 +38,14 @@ def classify(config):
         #data_npy = data[1].to_numpy()
         #input_data = np.interp(X_axis,np.linspace(0,1000,num=data_npy.shape[0]),data_npy)
         #X = input_data.reshape(1,1000)
+        X_batch = []
+        for spectrum_ind, intensity in enumerate(batch.intensity):
+            spectrum_data = {'intensity':intensity, 'raman_shift':batch.raman_shift[spectrum_ind]}
+            X = raman_shift_matching(spectrum_data)
+            X_batch.append(np.array(X))
 
-        data = config.spectra[i]
-        X = raman_shift_matching(data)
-        X = np.array(X)
-        X = X.reshape(1,1000)
+        X_batch = np.vstack(X_batch)
+        print("X_batch shape = {}".format(X_batch.shape))
 
         # CNN parameters
         layers = 6
@@ -52,7 +57,7 @@ def classify(config):
         in_channels = 64
         n_classes = 30
 
-        GPU_NUM = config.gpu_id # 원하는 GPU 번호 입력
+        GPU_NUM = batch.gpu_id # 원하는 GPU 번호 입력
         device = torch.device(f'cuda:{GPU_NUM}' if torch.cuda.is_available() else 'cpu')
         torch.cuda.set_device(device) # change allocation of current GPU
         print ('Current cuda device ', torch.cuda.current_device()) # check
@@ -63,15 +68,16 @@ def classify(config):
                         in_channels=in_channels, n_classes=n_classes)
         cnn.cuda()
         cnn.load_state_dict(torch.load(
-            config.model_fn, map_location=lambda storage, loc: storage))
+            batch.model, map_location=lambda storage, loc: storage))
 
-        y = np.array([0])
+        #y = np.array([0])
+        y = np.array(batch.label)
 
-        dl_test = spectral_dataloader(X, y,batch_size=config.batch_size,num_workers=1)
+        dl_test = spectral_dataloader(X_batch, y, batch_size=batch.batch_size,num_workers=1)
         probs_list, preds, acc = get_predictions(cnn,dl_test,cuda)
         # prob_test= get_predictions(cnn,dl_test,cuda,get_probs=True)
 
         print(preds, acc)
         print(probs_list)
-        result.append([preds, acc, probs_list]) # [List[int], float, List[List[float]]]
-    return result
+        results[batch.model] = [preds, acc, probs_list] # [List[int], float, List[List[float]]]
+    return results

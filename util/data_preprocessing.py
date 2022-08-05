@@ -8,7 +8,7 @@ MINSHIFT = 382
 MAXSHIFT = 1792
 INPUTDIM = 1000
 
-def raman_shift_matching(spectra_data):
+def raman_shift_matching(spectrum_data):
 
     minshift = MINSHIFT
     maxshift = MAXSHIFT
@@ -17,8 +17,8 @@ def raman_shift_matching(spectra_data):
     unit_shift = (maxshift - minshift)/input_dim
     print("unit_shift = ",unit_shift)
 
-    raman_shift_arr = np.array(spectra_data['raman_shift'])
-    intensity_arr = np.array(spectra_data['intensity'])
+    raman_shift_arr = np.array(spectrum_data['raman_shift'])
+    intensity_arr = np.array(spectrum_data['intensity'])
 
     # given spectrum data interpolation for NN input format
     if minshift <= raman_shift_arr[0]:

@@ -41,6 +41,7 @@ def get_predictions(model, dataloader, cuda):#, get_probs=False):
     data_count = 0
     model.eval()
     for batch_idx, (inputs, targets) in enumerate(dataloader):
+        print("batch_idx : {}, targets : {}".format(batch_idx,targets))
         if cuda: inputs, targets = inputs.cuda(), targets.cuda()
         inputs, targets = Variable(inputs), Variable(targets.long())
         outputs = model(inputs)
@@ -66,7 +67,7 @@ def get_predictions(model, dataloader, cuda):#, get_probs=False):
         _, predicted = torch.max(outputs.data, 1)
         corrections = (predicted-targets)
         correction_count = correction_count + numel(corrections[corrections==0])
-        data_count = data_count + 1
+        data_count = data_count + targets.shape[0]
         #print(correction_count)
         if cuda: predicted = predicted.cpu()
         preds += list(predicted.numpy().ravel())
