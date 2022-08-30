@@ -41,7 +41,7 @@ def get_predictions(model, dataloader, cuda):#, get_probs=False):
     data_count = 0
     model.eval()
     for batch_idx, (inputs, targets) in enumerate(dataloader):
-        print("batch_idx : {}, targets : {}".format(batch_idx,targets))
+        #print("batch_idx : {}, targets : {}".format(batch_idx,targets))
         if cuda: inputs, targets = inputs.cuda(), targets.cuda()
         inputs, targets = Variable(inputs), Variable(targets.long())
         outputs = model(inputs)

@@ -53,7 +53,15 @@ class ResNet(nn.Module):
         self.encoder = nn.Sequential(*layers)
 
         self.z_dim = self._get_encoding_size()
-        self.linear = nn.Linear(self.z_dim, self.n_classes)
+        if self.z_dim < 6000 :
+            print("- - one layer classifier [{}]- - ".format(self.z_dim))
+            self.big_flg = 0
+            self.linear = nn.Linear(self.z_dim, self.n_classes)
+        else :
+            print("- - two layer classifier [{}]- - ".format(self.z_dim))
+            self.big_flg = 1
+            self.linear1 = nn.Linear(self.z_dim, int(self.z_dim/2))
+            self.linear2 = nn.Linear(int(self.z_dim/2), self.n_classes)
 
 
     def encode(self, x):
@@ -64,7 +72,11 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         z = self.encode(x)
-        return self.linear(z)
+        if self.big_flg == 0 :
+            return self.linear(z)
+        else :
+            out = self.linear1(z)
+            return self.linear2(out)
 
 
     def _make_layer(self, out_channels, num_blocks, stride=1):

@@ -66,10 +66,12 @@ def classify(batch_dic):
         # Load trained weights for demo
         cnn = ResNet(hidden_sizes, num_blocks, input_dim=input_dim,
                         in_channels=in_channels, n_classes=n_classes)
+        #print(cnn)
         cnn.cuda()
         cnn.load_state_dict(torch.load(
             batch.model, map_location=lambda storage, loc: storage))
 
+        #print(cnn)
         #y = np.array([0])
         y = np.array(batch.label)
 
