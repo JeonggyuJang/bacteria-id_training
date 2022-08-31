@@ -59,15 +59,20 @@ def classify(batch_dic):
 
         GPU_NUM = batch.gpu_id # 원하는 GPU 번호 입력
         device = torch.device(f'cuda:{GPU_NUM}' if torch.cuda.is_available() else 'cpu')
-        torch.cuda.set_device(device) # change allocation of current GPU
-        print ('Current cuda device ', torch.cuda.current_device()) # check
-        if device != 'cpu' : cuda = True
+        print(device.type, device != 'cpu')
+        if device.type != 'cpu' : 
+            print ('Current cuda device ', torch.cuda.current_device()) # check
+            cuda = True
+            torch.cuda.set_device(device) # change allocation of current GPU
+        else :
+            cuda = False
 
         # Load trained weights for demo
         cnn = ResNet(hidden_sizes, num_blocks, input_dim=input_dim,
                         in_channels=in_channels, n_classes=n_classes)
         #print(cnn)
-        cnn.cuda()
+        if cuda:
+            cnn.cuda()
         cnn.load_state_dict(torch.load(
             batch.model, map_location=lambda storage, loc: storage))
 
